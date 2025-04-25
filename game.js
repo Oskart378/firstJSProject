@@ -51,12 +51,13 @@ function playRound(humanChoice, computerChoice) {
 
 
 function determineWinner(player1, player2) {
-    if(player1 == player2) {
+
+    if(player1 === player2) {
         return 0;
     }
-    else if((player1 == "rock" && player2 == "scissors") ||
-        (player1 == "paper" && player2 == "rock") ||
-        (player1 == "scissors" && player2 == "paper")) {
+    else if((player1 === "rock" && player2 === "scissors") ||
+        (player1 === "paper" && player2 === "rock") ||
+        (player1 === "scissors" && player2 === "paper")) {
         return 1;
     }
 
@@ -79,7 +80,7 @@ function playGame() {
         playRound(humanSelection, computerChoice);
     }
 
-    if (humanScore == computerChoice)
+    if (humanScore === computerChoice)
         console.log("It's a tie!");
     else if (humanScore > computerScore) 
         console.log("You are the winner!");
