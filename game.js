@@ -1,3 +1,5 @@
+let resultOutput = document.createElement("div");
+
 function getComputerChoice() {
     const choice = Math.floor((Math.random() * 3));
     
@@ -30,23 +32,27 @@ function getChoice(choice) {
 let humanScore = 0;
 let computerScore = 0;
 
-function playRound(humanChoice, computerChoice) {
+function playRound(humanChoice) {
 
-    const winnerValue = determineWinner(humanChoice, computerChoice);
+    let computerChoice = getComputerChoice();
+    playerSelection = humanChoice.target.textContent.toLowerCase();
+    const winnerValue = determineWinner(playerSelection, computerChoice);
 
     switch(winnerValue) {
         case 0:
-            console.log("it's a tie!");
+            resultOutput.textContent = "it's a tie!";
             break;
         case 1:
             humanScore++;
-            console.log(`You Win! ${humanChoice} beats ${computerChoice}`);
+            resultOutput.textContent = `You Win! ${playerSelection} beats ${computerChoice}`;
             break;
         case 2:
             computerScore++;
-            console.log(`You Lose! ${computerChoice} beats ${humanChoice}`);
+            resultOutput.textContent = `You Lose! ${computerChoice} beats ${playerSelection}`;
 
     }
+
+    checkForGameWinner();
 }
 
 
@@ -66,28 +72,85 @@ function determineWinner(player1, player2) {
     }
 }
 
-function playGame() {
+function getScoresInfo() {
 
-    let humanSelection;
-    let computerChoice;
+    return "Player: " +  humanScore + "\t" + "Computer: " + computerScore;
+}
 
-    
+function checkForGameWinner() {
 
-    for (let i = 0; i < 5; i++) {
+    runningScoresBoard.textContent = getScoresInfo();
 
-        humanSelection = getHumanChoice();
-        computerChoice = getComputerChoice();
-        playRound(humanSelection, computerChoice);
+    if (humanScore === 5) {
+        alert("You are the winner!");
+       resetGame();
     }
 
-    if (humanScore === computerScore)
-        console.log("It's a tie!");
-    else if (humanScore > computerScore) 
-        console.log("You are the winner!");
-    else{
-        console.log("Computer is the winner!");
+    else if (computerScore === 5){
+        alert("Computer is the winner!");
+        resetGame();
     }
 }
 
+function resetGame() {
 
-playGame();
+    humanScore = 0;
+    computerScore = 0;
+    resultOutput.textContent = "";
+    runningScoresBoard.textContent = getScoresInfo();
+}
+
+// function playGame() {
+
+//     let humanSelection;
+//     let computerChoice;
+
+    
+
+//     for (let i = 0; i < 5; i++) {
+
+//         humanSelection = getHumanChoice();
+//         computerChoice = getComputerChoice();
+//         playRound(humanSelection, computerChoice);
+//     }
+
+//     if (humanScore === computerScore)
+//         console.log("It's a tie!");
+//     else if (humanScore > computerScore) 
+//         console.log("You are the winner!");
+//     else{
+//         console.log("Computer is the winner!");
+//     }
+// }
+
+let rpsButtons = [];
+
+
+for (let i = 0; i < 3; i++) {
+    rpsButtons.push(document.createElement("button"));
+}
+
+rpsButtons[0].textContent = "Rock";
+rpsButtons[1].textContent = "Paper";
+rpsButtons[2].textContent = "Scissors";
+
+
+rpsButtons.forEach(b => b.addEventListener("click", playRound));
+
+let rpsContainer = document.createElement("div");
+let documentBody = document.querySelector("body");
+
+
+for(let b of rpsButtons){
+    rpsContainer.appendChild(b);
+}
+
+let runningScoresBoard = document.createElement("div");
+
+runningScoresBoard.textContent = getScoresInfo();
+
+documentBody.appendChild(rpsContainer);
+documentBody.appendChild(resultOutput);
+documentBody.appendChild(runningScoresBoard);
+
+
