@@ -1,156 +1,161 @@
-let resultOutput = document.createElement("div");
+//------ Constants -------
 
-function getComputerChoice() {
-    const choice = Math.floor((Math.random() * 3));
-    
-    return getChoice(choice);
-}
+const CHOICES = ["rock", "paper", "scissors"];
+const TIE = 0;
+const PLAYER_WINS = 1;
+const COMPUTER_WINS = 2;
 
-function getHumanChoice() {
-    let choice = null;
+// ----- Game State --------
 
-    while(choice < 1 || choice > 3)
-        choice = prompt("Enter an option from 1 to 3, (1 = rock, 2 = paper, 3 = scissors)");
-    
-    return getChoice(choice - 1);
-}
-
-function getChoice(choice) {
-
-    switch(choice) {
-        case 0: 
-            return "rock";
-        case 1:
-            return "paper";
-        case 2: 
-            return "scissors";
-        default:
-            return null;
-    }
-}
-
-let humanScore = 0;
+let playerScore = 0;
 let computerScore = 0;
+let gameOver = false;
 
-function playRound(humanChoice) {
+//------ DOM Elements -------
 
-    let computerChoice = getComputerChoice();
-    playerSelection = humanChoice.target.textContent.toLowerCase();
-    const winnerValue = determineWinner(playerSelection, computerChoice);
+const resultDisplay = document.querySelector("#result");
+const scoreBoard = document.querySelector("#scoreboard");
+const buttonContainer = document.querySelector("#button-container");
+const gameContainer = document.querySelector(".game-container");
+let gameOverDisplay;
 
-    switch(winnerValue) {
-        case 0:
-            resultOutput.textContent = "it's a tie!";
-            break;
-        case 1:
-            humanScore++;
-            resultOutput.textContent = `You Win! ${playerSelection} beats ${computerChoice}`;
-            break;
-        case 2:
-            computerScore++;
-            resultOutput.textContent = `You Lose! ${computerChoice} beats ${playerSelection}`;
 
-    }
+//----- Utility Functions----
 
-    checkForGameWinner();
+function getRandomComputerChoice() {
+    return CHOICES[Math.floor(Math.random() * CHOICES.length)];
 }
 
 
-function determineWinner(player1, player2) {
+function determineWinner(playerChoice, computerChoice) {
 
-    if(player1 === player2) {
-        return 0;
+    if (playerChoice === computerChoice)
+        return TIE;
+    if ((playerChoice === "rock" && computerChoice === "scissors") ||
+        (playerChoice === "paper" && computerChoice === "rock") ||
+        (playerChoice === "scissors" && computerChoice === "paper")
+      ) return PLAYER_WINS;
+
+      return COMPUTER_WINS;
+}
+
+
+function getFormattedScore() {
+    return `Player: ${playerScore} | Computer: ${computerScore}`;
+}
+
+function updateScore(winner) {
+    if (winner === PLAYER_WINS) playerScore++;
+    if (winner === COMPUTER_WINS) computerScore++;
+    scoreBoard.textContent = getFormattedScore();
+}
+
+function displayRoundResult(winner, playerChoice, computerChoice) {
+
+    if (winner === TIE) {
+        resultDisplay.textContent = "It's a tie!";
     }
-    else if((player1 === "rock" && player2 === "scissors") ||
-        (player1 === "paper" && player2 === "rock") ||
-        (player1 === "scissors" && player2 === "paper")) {
-        return 1;
+    
+    else if (winner === PLAYER_WINS) {
+        resultDisplay.textContent = `You Win! ${playerChoice} beats ${computerChoice}`;
     }
 
     else {
-        return 2;
+        resultDisplay.textContent = `You Lose! ${computerChoice} beats ${playerChoice}`;
     }
 }
 
-function getScoresInfo() {
 
-    return "Player: " +  humanScore + "\t" + "Computer: " + computerScore;
-}
+function checkGameOver() {
+    if (playerScore === 5 || computerScore === 5) {
+        gameOver = true;
+        gameOverDisplay.textContent = playerScore === 5 ? "🎉 You are the winner!" : "💀 Computer is the winner!";
+        gameOverDisplay.classList.add("show");
+        playAgainButton.style.display = "block"; // 👈 Show the button
 
-function checkForGameWinner() {
-
-    runningScoresBoard.textContent = getScoresInfo();
-
-    if (humanScore === 5) {
-        alert("You are the winner!");
-       resetGame();
-    }
-
-    else if (computerScore === 5){
-        alert("Computer is the winner!");
-        resetGame();
     }
 }
 
 function resetGame() {
-
-    humanScore = 0;
+    playerScore = 0;
     computerScore = 0;
-    resultOutput.textContent = "";
-    runningScoresBoard.textContent = getScoresInfo();
+    gameOver = false;
+    scoreBoard.textContent = getFormattedScore();
+    resultDisplay.textContent = "";
+    gameOverDisplay.textContent = "";
+    gameOverDisplay.classList.remove("show");
+
+    showMoves("", "");
+    playAgainButton.style.display = "none"; // 👈 Hide the button again
+
 }
 
-// function playGame() {
-
-//     let humanSelection;
-//     let computerChoice;
-
-    
-
-//     for (let i = 0; i < 5; i++) {
-
-//         humanSelection = getHumanChoice();
-//         computerChoice = getComputerChoice();
-//         playRound(humanSelection, computerChoice);
-//     }
-
-//     if (humanScore === computerScore)
-//         console.log("It's a tie!");
-//     else if (humanScore > computerScore) 
-//         console.log("You are the winner!");
-//     else{
-//         console.log("Computer is the winner!");
-//     }
-// }
-
-let rpsButtons = [];
-
-
-for (let i = 0; i < 3; i++) {
-    rpsButtons.push(document.createElement("button"));
+function showMoves(playerChoice, computerChoice) {
+    document.querySelector("#player-move").textContent = `🧍 You: ${playerChoice}`;
+    document.querySelector("#computer-move").textContent = `💻 CPU: ${computerChoice}`;
 }
 
-rpsButtons[0].textContent = "Rock";
-rpsButtons[1].textContent = "Paper";
-rpsButtons[2].textContent = "Scissors";
+//-------- Game Flow--------
 
+function handlePlayerChoice(event) {
 
-rpsButtons.forEach(b => b.addEventListener("click", playRound));
+    if (gameOver) return;
+ 
+    event.target.classList.add("clicked");
+    setTimeout(() => event.target.classList.remove("clicked"), 200);
 
-let rpsContainer = document.createElement("div");
-let documentBody = document.querySelector("body");
+    const playerChoice = event.target.textContent.toLowerCase();
+    const computerChoice = getRandomComputerChoice();
+    const winner = determineWinner(playerChoice, computerChoice);
 
-
-for(let b of rpsButtons){
-    rpsContainer.appendChild(b);
+    updateScore(winner);
+    displayRoundResult(winner, playerChoice, computerChoice);
+    showMoves(playerChoice, computerChoice);
+    checkGameOver();
 }
 
-let runningScoresBoard = document.createElement("div");
+//--------- UI Setup ---------
 
-runningScoresBoard.textContent = getScoresInfo();
+function initializeUI() {
+    CHOICES.forEach( choice => {
+        const button = document.createElement("button");
+        button.textContent = choice.charAt(0).toUpperCase() + choice.slice(1);
+        button.addEventListener("click", handlePlayerChoice);
+        buttonContainer.appendChild(button);
+        button.classList.add(choice.toLowerCase());
 
-documentBody.appendChild(rpsContainer);
-documentBody.appendChild(resultOutput);
-documentBody.appendChild(runningScoresBoard);
+    });
 
 
+    scoreBoard.textContent = getFormattedScore();
+
+    gameContainer.appendChild(buttonContainer);
+    gameContainer.appendChild(resultDisplay);
+    gameContainer.appendChild(scoreBoard);
+
+    const playerMoveDisplay = document.createElement("div");
+    playerMoveDisplay.id = "player-move";
+
+    const computerMoveDisplay = document.createElement("div");
+    computerMoveDisplay.id = "computer-move";
+
+    // Append them to the DOM
+    gameContainer.appendChild(playerMoveDisplay);
+    gameContainer.appendChild(computerMoveDisplay);
+
+    showMoves("", "");
+
+    gameOverDisplay = document.createElement("div");
+    gameOverDisplay.id = "game-over-message";
+    gameContainer.appendChild(gameOverDisplay);
+
+    playAgainButton = document.createElement("button");
+    playAgainButton.textContent = "Play Again";
+    playAgainButton.id = "play-again";
+    playAgainButton.style.display = "none"; // hide it initially
+    playAgainButton.addEventListener("click", resetGame);
+    gameContainer.appendChild(playAgainButton);
+
+}
+
+initializeUI();
